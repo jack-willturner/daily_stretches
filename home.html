@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Stretch App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #f8f9fa;
+      color: #212529;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-weight: 600;
+      color: #1a73e8;
+      margin-bottom: 40px;
+      font-size: 2.5rem;
+    }
+
+    #stretch-container {
+      font-size: 2rem;
+      margin: 30px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    #stretch-container:hover {
+      transform: translateY(-2px);
+    }
+
+    #next-stretch {
+      color: #6c757d;
+      font-size: 1.1rem;
+      margin: 15px 0;
+    }
+
+    #timer {
+      font-size: 1.5rem;
+      margin: 20px 0;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    #progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e9ecef;
+      margin: 25px 0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    #progress {
+      height: 100%;
+      background: linear-gradient(90deg, #1a73e8, #4285f4);
+      width: 100%;
+      transition: width 1s linear;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      margin: 0 10px;
+    }
+
+    #start-btn {
+      background-color: #1a73e8;
+      color: white;
+    }
+
+    #start-btn:hover {
+      background-color: #1557b0;
+      transform: translateY(-2px);
+    }
+
+    #pause-btn {
+      background-color: #f8f9fa;
+      color: #1a73e8;
+      border: 2px solid #1a73e8;
+    }
+
+    #pause-btn:hover {
+      background-color: #e8f0fe;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      #stretch-container {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Daily Stretch Routine</h1>
+  <div id="stretch-container">Press Start to Begin</div>
+  <div id="next-stretch"></div>
+  <div id="timer"></div>
+  <div id="progress-bar">
+    <div id="progress"></div>
+  </div>
+  <button id="start-btn">Start Stretching</button>
+  <button id="pause-btn" style="display: none;">Pause</button>
+  <script>
+    const stretches = [
+      "Hamstring Stretch", "Quadriceps Stretch", "Shoulder Stretch", "Triceps Stretch",
+      "Neck Stretch", "Calf Stretch", "Hip Flexor Stretch", "Chest Stretch",
+      "Lower Back Stretch", "Side Stretch", "Butterfly Stretch", "Seated Spinal Twist",
+      "Child's Pose", "Cat-Cow Stretch", "Downward Dog Stretch"
+    ];
+
+    let dailyStretches = [];
+    let currentStretch = 0;
+    let timer = 30;
+    let transitionTimer = 5;
+    let isStretching = false;
+    let isTransitioning = false;
+    let interval;
+    let isPaused = false;
+
+    const stretchContainer = document.getElementById("stretch-container");
+    const nextStretch = document.getElementById("next-stretch");
+    const timerDisplay = document.getElementById("timer");
+    const progressBar = document.getElementById("progress");
+    const startBtn = document.getElementById("start-btn");
+    const pauseBtn = document.getElementById("pause-btn");
+
+    function getDailyStretches() {
+      return stretches.sort(() => 0.5 - Math.random()).slice(0, 10);
+    }
+
+    function updateUI() {
+      stretchContainer.textContent = dailyStretches[currentStretch];
+      nextStretch.textContent = currentStretch + 1 < dailyStretches.length
+        ? `Next: ${dailyStretches[currentStretch + 1]} in ${transitionTimer} seconds`
+        : "";
+      timerDisplay.textContent = isTransitioning ? `${transitionTimer} seconds until next stretch` : `${timer} seconds remaining`;
+      progressBar.style.width = isTransitioning ? `${(transitionTimer / 5) * 100}%` : `${(timer / 30) * 100}%`;
+    }
+
+    function startStretching() {
+      dailyStretches = getDailyStretches();
+      currentStretch = 0;
+      timer = 30;
+      isStretching = true;
+      isTransitioning = false;
+      isPaused = false;
+      updateUI();
+      clearInterval(interval);
+      interval = setInterval(runTimer, 1000);
+      pauseBtn.style.display = "inline";
+      startBtn.style.display = "none";
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? "Resume" : "Pause";
+      if (isPaused) {
+        clearInterval(interval);
+      } else {
+        interval = setInterval(runTimer, 1000);
+      }
+    }
+
+    function runTimer() {
+      if (isPaused) return;
+      if (!isTransitioning && timer > 0) {
+        timer--;
+      } else if (timer === 0) {
+        isTransitioning = true;
+        transitionTimer = 5;
+      } else if (isTransitioning && transitionTimer > 0) {
+        transitionTimer--;
+      } else if (transitionTimer === 0) {
+        nextStretchFunc();
+      }
+      updateUI();
+    }
+
+    function nextStretchFunc() {
+      if (currentStretch < dailyStretches.length - 1) {
+        currentStretch++;
+        timer = 30;
+        isTransitioning = false;
+        playDing();
+      } else {
+        clearInterval(interval);
+        isStretching = false;
+        stretchContainer.textContent = "Stretching Complete!";
+        nextStretch.textContent = "";
+        timerDisplay.textContent = "";
+        pauseBtn.style.display = "none";
+        startBtn.style.display = "inline";
+        playDing();
+      }
+      updateUI();
+    }
+
+    function playDing() {
+      new Audio("https://www.myinstants.com/media/sounds/ding-sound-effect.mp3").play();
+    }
+
+    startBtn.addEventListener("click", startStretching);
+    pauseBtn.addEventListener("click", togglePause);
+  </script>
+</body>
+
+</html>
