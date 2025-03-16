@@ -1,0 +1,33 @@
+#pause-btn:hover {
+background-color: #e8f0fe;
+transform: translateY(-2px);
+}
+
+#skip-btn {
+background-color: transparent;
+color: #6c757d;
+border: 1px solid #6c757d;
+font-size: 0.9rem;
+padding: 8px 16px;
+}
+
+#skip-btn:hover {
+background-color: #f1f3f5;
+color: #495057;
+transform: translateY(-2px);
+}
+
+button:active {
+transform: translateY(1px);
+}
+
+@media (max-width: 600px) {
+// ... existing code ...
+}
+
+<button id="start-btn">Start Stretching</button>
+<button id="pause-btn" style="display: none;">Pause</button>
+<button id="skip-btn" style="display: none;">Skip</button>
+<script>
+  // ... existing code ...
+  const startBtn = document.getElementById("start-btn");

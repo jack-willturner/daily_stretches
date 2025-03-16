@@ -107,6 +107,20 @@
       transform: translateY(-2px);
     }
 
+    #skip-btn {
+      background-color: transparent;
+      color: #6c757d;
+      border: 1px solid #6c757d;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+    }
+
+    #skip-btn:hover {
+      background-color: #f1f3f5;
+      color: #495057;
+      transform: translateY(-2px);
+    }
+
     button:active {
       transform: translateY(1px);
     }
@@ -137,6 +151,7 @@
   </div>
   <button id="start-btn">Start Stretching</button>
   <button id="pause-btn" style="display: none;">Pause</button>
+  <button id="skip-btn" style="display: none;">Skip</button>
   <script>
     const stretches = [
       "Hamstring Stretch", "Quadriceps Stretch", "Shoulder Stretch", "Triceps Stretch",
@@ -160,6 +175,7 @@
     const progressBar = document.getElementById("progress");
     const startBtn = document.getElementById("start-btn");
     const pauseBtn = document.getElementById("pause-btn");
+    const skipBtn = document.getElementById("skip-btn");
 
     function getDailyStretches() {
       return stretches.sort(() => 0.5 - Math.random()).slice(0, 10);
@@ -185,6 +201,7 @@
       clearInterval(interval);
       interval = setInterval(runTimer, 1000);
       pauseBtn.style.display = "inline";
+      skipBtn.style.display = "inline";
       startBtn.style.display = "none";
     }
 
@@ -202,12 +219,13 @@
       if (isPaused) return;
       if (!isTransitioning && timer > 0) {
         timer--;
-      } else if (timer === 0) {
+      } else if (timer === 0 && !isTransitioning) {
         isTransitioning = true;
         transitionTimer = 5;
+        playDing();
       } else if (isTransitioning && transitionTimer > 0) {
         transitionTimer--;
-      } else if (transitionTimer === 0) {
+      } else if (isTransitioning && transitionTimer === 0) {
         nextStretchFunc();
       }
       updateUI();
@@ -218,7 +236,6 @@
         currentStretch++;
         timer = 30;
         isTransitioning = false;
-        playDing();
       } else {
         clearInterval(interval);
         isStretching = false;
@@ -226,10 +243,20 @@
         nextStretch.textContent = "";
         timerDisplay.textContent = "";
         pauseBtn.style.display = "none";
+        skipBtn.style.display = "none";
         startBtn.style.display = "inline";
         playDing();
       }
       updateUI();
+    }
+
+    function skipStretch() {
+      if (currentStretch < dailyStretches.length - 1) {
+        currentStretch++;
+        timer = 30;
+        isTransitioning = false;
+        updateUI();
+      }
     }
 
     function playDing() {
@@ -238,6 +265,7 @@
 
     startBtn.addEventListener("click", startStretching);
     pauseBtn.addEventListener("click", togglePause);
+    skipBtn.addEventListener("click", skipStretch);
   </script>
 </body>
 
